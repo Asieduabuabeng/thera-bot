@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 const gameData: { [key: string]: { currentWordIndex: number } } = {};
 
 const scrambledWords = [
-  { word: "ASNAT LACSU", hint: "ASNAT LACSU. Unscramble to form a mythical person (often related to a holiday).", answer: "SANTA CLAUS" },
-  { word: "AEPLPE", hint: "AEPLPE. Unscramble to form a fruit (often red or green).", answer: "APPLE" },
-  { word: "TELFRISEBTU", hint: "TELFRISEBTU. Unscramble to form a type of beautiful insect (often seen during Spring).", answer: "BUTTERFLY" },
-  { word: "CEI RAMEC", hint: "CEI RAMEC. Unscramble to form a type of snack (often kept frozen).", answer: "ICE CREAM" },
-  { word: "LOREFSW", hint: "LOREFSW. Unscramble to form an object part of nature (often used to show love or appreciation).", answer: "FLOWERS" }
+  { word: "ASNAT LACSU", hint: "Unscramble to form a mythical person (often related to a holiday).", answer: "SANTA CLAUS" },
+  { word: "AEPLPE", hint: "Unscramble to form a fruit (often red or green).", answer: "APPLE" },
+  { word: "TELFRISEBTU", hint: "Unscramble to form a type of beautiful insect (often seen during Spring).", answer: "BUTTERFLY" },
+  { word: "CEI RAMEC", hint: "Unscramble to form a type of snack (often kept frozen).", answer: "ICE CREAM" },
+  { word: "LOREFSW", hint: "Unscramble to form an object part of nature (often used to show love or appreciation).", answer: "FLOWERS" }
   // Add more words as needed
 ];
 
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     } else if (text.startsWith("3*1*")) {
       const userGame = gameData[phoneNumber] || { currentWordIndex: 0 };
       const currentWord = scrambledWords[userGame.currentWordIndex];
-      const answer = text.split("*")[3]; // Assuming the user's answer is part of the text
+      const answer = textArray[3]; // Extract the user's answer from the text array
 
       if (answer.toUpperCase() === currentWord.answer.toUpperCase()) {
         userGame.currentWordIndex += 1;
