@@ -4,10 +4,11 @@ const gameData: { [key: string]: { currentWordIndex: number } } = {};
 
 const scrambledWords = [
   { word: "ASNAT LACSU", hint: "Unscramble to form a mythical person (often related to a holiday).", answer: "SANTA CLAUS" },
-  { word: "AEPLP", hint: "Unscramble to form a fruit (often red or green).", answer: "APPLE" },
+  { word: "AEPLPE", hint: "Unscramble to form a fruit (often red or green).", answer: "APPLE" },
   { word: "TELFRISEBTU", hint: "Unscramble to form a type of beautiful insect (often seen during Spring).", answer: "BUTTERFLY" },
   { word: "CEI RAMEC", hint: "Unscramble to form a type of snack (often kept frozen).", answer: "ICE CREAM" },
   { word: "LOREFSW", hint: "Unscramble to form an object part of nature (often used to show love or appreciation).", answer: "FLOWERS" }
+  // Add more words as needed
 ];
 
 export async function POST(req: NextRequest) {
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
     } else if (text === "2*5") {
       response = `END Please dial 037 202 2889 for Northern Region.`;
     } else if (text === "3") {
-      response = `CON Games:\n1. Word Scramble\n0. Back`;
+      response = `CON Games:\n1. Word Scramble\n2. Free Web Games\n3. Free Web Comics/Stories\n0. Back`;
     } else if (text === "3*1") {
       const userGame = gameData[phoneNumber] || { currentWordIndex: 0 };
       const currentWord = scrambledWords[userGame.currentWordIndex];
@@ -102,6 +103,10 @@ export async function POST(req: NextRequest) {
       } else {
         response = `CON Incorrect. Try again:\nHint: ${currentWord.hint}\nScrambled Word: ${currentWord.word}`;
       }
+    } else if (text === "3*2") {
+      response = `END Visit the following URLs for free web games:\n1. https://www.miniclip.com\n2. https://www.kongregate.com\n3. https://www.crazygames.com`;
+    } else if (text === "3*3") {
+      response = `END Visit the following URLs for free web comics/stories:\n1. https://www.webtoons.com\n2. https://www.tapas.io\n3. https://www.shortstories.com`;
     } else if (text === "0") {
       response = `CON Hi, welcome. Your mental health is a priority. Don't be afraid to seek help.\n1. Suicide and Crisis\n2. Telephone Counselling\n3. Play a Game`;
     } else {
