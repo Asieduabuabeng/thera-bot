@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     } else if (text.startsWith("3*1*")) {
       const userGame = gameData[phoneNumber] || { currentWordIndex: 0 };
       const currentWord = scrambledWords[userGame.currentWordIndex];
-      const answer = textArray[3]; // Extract the user's answer from the text array
+      const answer = textArray[2]; // Extract the user's answer from the text array
 
       if (answer.toUpperCase() === currentWord.answer.toUpperCase()) {
         userGame.currentWordIndex += 1;
