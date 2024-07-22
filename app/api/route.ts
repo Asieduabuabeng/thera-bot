@@ -8,7 +8,6 @@ const scrambledWords = [
   { word: "TELFRISEBTU", hint: "Unscramble to form a type of beautiful insect (often seen during Spring).", answer: "BUTTERFLY" },
   { word: "CEI RAMEC", hint: "Unscramble to form a type of snack (often kept frozen).", answer: "ICE CREAM" },
   { word: "LOREFSW", hint: "Unscramble to form an object part of nature (often used to show love or appreciation).", answer: "FLOWERS" }
-  // Add more words as needed
 ];
 
 export async function POST(req: NextRequest) {
@@ -44,7 +43,6 @@ export async function POST(req: NextRequest) {
 
     const { sessionId, serviceCode, phoneNumber, text } = data;
     const textArray = text.split("*");
-    const level = textArray.length;
 
     let response = "";
 
@@ -89,7 +87,7 @@ export async function POST(req: NextRequest) {
     } else if (text.startsWith("3*1*")) {
       const userGame = gameData[phoneNumber] || { currentWordIndex: 0 };
       const currentWord = scrambledWords[userGame.currentWordIndex];
-      const answer = textArray[2]; // Extract the user's answer from the text array
+      const answer = textArray[textArray.length - 1]; // Extract the user's answer from the last part of the text array
 
       if (answer.toUpperCase() === currentWord.answer.toUpperCase()) {
         userGame.currentWordIndex += 1;
