@@ -1,5 +1,4 @@
-// pages/api/ussd.ts
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from "next/server";
 
 // Simulated session store (for development purposes)
 const sessionStore: { [key: string]: { userData: string, currentWordIndex: number } } = {};
@@ -13,28 +12,45 @@ const scrambledWords = [
   { word: "LOREFSW", hint: "Unscramble to form an object part of nature (often used to show love or appreciation).", answer: "FLOWERS" }
 ];
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function POST(req: NextRequest) {
   if (req.method !== "POST") {
-    res.setHeader("Allow", ["POST"]);
-    res.status(405).json({ message: "Method Not Allowed" });
-    return;
+    return new NextResponse(JSON.stringify({ message: "Method Not Allowed" }), {
+      status: 405,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 
   try {
-    const contentType = req.headers["content-type"];
+    const contentType = req.headers.get("content-type");
     if (contentType !== "application/x-www-form-urlencoded") {
-      res.status(415).json({ message: "Unsupported Media Type" });
-      return;
+      return new NextResponse(
+        JSON.stringify({ message: "Unsupported Media Type" }),
+        {
+          status: 415,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     // Parse the URL-encoded request body
-    const body = req.body as Record<string, string>;
+    const formData = await req.formData();
+    const data: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      data[key] = value.toString();
+    });
 
-    const ussd_id = body['USERID'];
-    const msisdn = body['MSISDN'];
-    const user_data = body['USERDATA'];
-    const msgtype = body['MSGTYPE'];
+    const ussd_id = data['USERID'];
+    const msisdn = data['MSISDN'];
+    const user_data = data['USERDATA'];
+    const msgtype = data['MSGTYPE'];
     const sessionId = msisdn;  // Using msisdn as the session identifier
+
+    console.log("Received data:", data); // Debug log
+    console.log("Session ID:", sessionId); // Debug log
 
     let response = "";
 
@@ -86,6 +102,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const currentWord = scrambledWords[userGame.currentWordIndex];
       const answer = user_data.split("*").pop() || ""; // Extract the user's answer from the last part of the text array
 
+      console.log("Current Word:", currentWord); // Debug log
+      console.log("User Answer:", answer); // Debug log
+
       if (answer.toUpperCase() === currentWord.answer.toUpperCase()) {
         userGame.currentWordIndex += 1;
 
@@ -108,9 +127,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       response = "END Invalid Choice.";
     }
 
-    res.status(200).setHeader("Content-Type", "text/plain").send(response);
+    return new NextResponse(response, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    });
   } catch (error) {
     console.error("Error processing request:", error);
-    res.status(400).json({ message: "Invalid form data" });
+    return new NextResponse(JSON.stringify({ message: "Invalid form data" }), {
+      status: 400,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 }
