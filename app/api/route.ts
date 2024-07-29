@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const contentType = req.headers.get("content-type");
-    if (contentType !== "application/x-www-form-urlencoded") {
+    if (contentType !== "application/json") {
       return new NextResponse(
         JSON.stringify({ message: "Unsupported Media Type" }),
         {
@@ -36,21 +36,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse the URL-encoded request body
-    const formData = await req.formData();
-    const data: Record<string, string> = {};
-    formData.forEach((value, key) => {
-      data[key] = value.toString();
-    });
-
+    // Parse the JSON request body
+    const data = await req.json();
+    
     const ussd_id = data['USERID'];
     const msisdn = data['MSISDN'];
     const user_data = data['USERDATA'];
     const msgtype = data['MSGTYPE'];
     const sessionId = msisdn;  // Using msisdn as the session identifier
-
-    console.log("Received data:", data); // Debug log
-    console.log("Session ID:", sessionId); // Debug log
 
     let response = "";
 
@@ -102,9 +95,6 @@ export async function POST(req: NextRequest) {
       const currentWord = scrambledWords[userGame.currentWordIndex];
       const answer = user_data.split("*").pop() || ""; // Extract the user's answer from the last part of the text array
 
-      console.log("Current Word:", currentWord); // Debug log
-      console.log("User Answer:", answer); // Debug log
-
       if (answer.toUpperCase() === currentWord.answer.toUpperCase()) {
         userGame.currentWordIndex += 1;
 
@@ -130,7 +120,7 @@ export async function POST(req: NextRequest) {
     return new NextResponse(response, {
       status: 200,
       headers: {
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
       },
     });
   } catch (error) {
