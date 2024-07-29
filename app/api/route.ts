@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Check if content type is application/json
     const contentType = req.headers.get("content-type");
     if (contentType !== "application/json") {
       return new NextResponse(
@@ -37,7 +38,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Parse the JSON request body
     const data = await req.json();
+    if (!data || typeof data !== 'object') {
+      throw new Error("Invalid JSON data");
+    }
+
     const ussd_id = data['USERID'];
     const msisdn = data['MSISDN'];
     const user_data = data['USERDATA'];
