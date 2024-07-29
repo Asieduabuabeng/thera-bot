@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
+import { parse } from 'querystring'; // Import querystring parser
 
 type GameData = {
   currentWordIndex: number;
@@ -23,19 +24,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const contentType = req.headers["content-type"];
-    if (contentType !== "application/x-www-form-urlencoded") {
-      res.setHeader("Content-Type", "application/json");
-      res.status(415).json({ message: "Unsupported Media Type" });
-      return;
-    }
+    // Parse the form data
+    const data = await new Promise<{ [key: string]: string }>((resolve, reject) => {
+      let body = '';
+      req.on('data', chunk => body += chunk);
+      req.on('end', () => {
+        resolve(parse(body) as { [key: string]: string });
+      });
+      req.on('error', reject);
+    });
 
-    const formData = req.body;
-
-    const sessionId = formData.sessionId;
-    const serviceCode = formData.serviceCode;
-    const phoneNumber = formData.phoneNumber;
-    const text = formData.text;
+    const sessionId = data.sessionId;
+    const serviceCode = data.serviceCode;
+    const phoneNumber = data.phoneNumber;
+    const text = data.text;
     const textArray = text.split("*");
 
     let response = "";
