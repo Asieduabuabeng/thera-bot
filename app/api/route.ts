@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { v4 as uuidv4 } from 'uuid'; // To generate unique IDs
 
 // Simulated session store (for development purposes)
 const sessionStore: { [key: string]: { userData: string, currentWordIndex: number } } = {};
@@ -41,7 +42,8 @@ export async function POST(req: NextRequest) {
     const msisdn = data['MSISDN'];
     const user_data = data['USERDATA'];
     const msgtype = data['MSGTYPE'];
-    const sessionId = msisdn;  // Using msisdn as the session identifier
+    const network = data['NETWORK'] || "MTN";
+    const sessionId = data['SESSIONID'] || uuidv4(); // Use provided or generate new
 
     let response = "";
 
@@ -120,7 +122,7 @@ export async function POST(req: NextRequest) {
       MSISDN: msisdn,
       USERDATA: response,
       MSGTYPE: false,
-      NETWORK: data['NETWORK'] || "MTN"
+      NETWORK: network
     }), {
       status: 200,
       headers: {
