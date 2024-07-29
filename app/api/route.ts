@@ -36,9 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse the JSON request body
     const data = await req.json();
-    
     const ussd_id = data['USERID'];
     const msisdn = data['MSISDN'];
     const user_data = data['USERDATA'];
@@ -52,7 +50,7 @@ export async function POST(req: NextRequest) {
       sessionStore[sessionId] = { userData: "", currentWordIndex: 0 };
     }
 
-    // Handle different text inputs
+    // Handle different user_data inputs
     if (user_data === "") {
       response = "CON Hi, welcome. Your mental health is a priority. Don't be afraid to seek help.\n1. Suicide and Crisis\n2. Telephone Counselling\n3. Play a Game";
     } else if (user_data === "1") {
@@ -117,7 +115,13 @@ export async function POST(req: NextRequest) {
       response = "END Invalid Choice.";
     }
 
-    return new NextResponse(response, {
+    return new NextResponse(JSON.stringify({
+      USERID: ussd_id,
+      MSISDN: msisdn,
+      USERDATA: response,
+      MSGTYPE: false,
+      NETWORK: data['NETWORK'] || "MTN"
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
