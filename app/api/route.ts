@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
-import { parse } from 'querystring'; // Import querystring parser
+import { parse } from 'querystring';
 
 type GameData = {
   currentWordIndex: number;
@@ -29,7 +29,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       let body = '';
       req.on('data', chunk => body += chunk);
       req.on('end', () => {
-        resolve(parse(body) as { [key: string]: string });
+        try {
+          resolve(parse(body) as { [key: string]: string });
+        } catch (parseError) {
+          reject(new Error("Error parsing form data"));
+        }
       });
       req.on('error', reject);
     });
@@ -115,9 +119,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     res.setHeader("Content-Type", "text/plain");
     res.status(200).send(response);
   } catch (error) {
-    console.error("Error processing request:", error);
+    console.error("Error processing request:", error.message);
     res.setHeader("Content-Type", "application/json");
-    res.status(400).json({ message: "Invalid form data" });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
