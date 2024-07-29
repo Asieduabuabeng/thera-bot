@@ -15,22 +15,25 @@ const scrambledWords = [
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method Not Allowed" });
+    res.setHeader("Allow", ["POST"]);
+    res.status(405).json({ message: "Method Not Allowed" });
+    return;
   }
 
   try {
-    const contentType = req.headers['content-type'];
+    const contentType = req.headers["content-type"];
     if (contentType !== "application/x-www-form-urlencoded") {
-      return res.status(415).json({ message: "Unsupported Media Type" });
+      res.status(415).json({ message: "Unsupported Media Type" });
+      return;
     }
 
     // Parse the URL-encoded request body
-    const data = req.body as Record<string, string>;
+    const body = req.body as Record<string, string>;
 
-    const ussd_id = data['USERID'];
-    const msisdn = data['MSISDN'];
-    const user_data = data['USERDATA'];
-    const msgtype = data['MSGTYPE'];
+    const ussd_id = body['USERID'];
+    const msisdn = body['MSISDN'];
+    const user_data = body['USERDATA'];
+    const msgtype = body['MSGTYPE'];
     const sessionId = msisdn;  // Using msisdn as the session identifier
 
     let response = "";
@@ -105,10 +108,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       response = "END Invalid Choice.";
     }
 
-    res.setHeader("Content-Type", "text/plain");
-    return res.status(200).send(response);
+    res.status(200).setHeader("Content-Type", "text/plain").send(response);
   } catch (error) {
     console.error("Error processing request:", error);
-    return res.status(400).json({ message: "Invalid form data" });
+    res.status(400).json({ message: "Invalid form data" });
   }
 }
