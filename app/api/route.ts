@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from 'crypto';
+import { randomUUID } from "crypto"; // Use crypto for generating unique IDs
 
 // Simulated session store (for development purposes)
 const sessionStore: { [key: string]: { userData: string, currentWordIndex: number } } = {};
@@ -13,45 +13,30 @@ const scrambledWords = [
   { word: "LOREFSW", hint: "Unscramble to form an object part of nature (often used to show love or appreciation).", answer: "FLOWERS" }
 ];
 
-const generateSessionId = () => randomBytes(16).toString('hex');
-
 export async function POST(req: NextRequest) {
   if (req.method !== "POST") {
-    return new NextResponse(JSON.stringify({ message: "Method Not Allowed" }), {
+    return new NextResponse("Method Not Allowed", {
       status: 405,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain",
       },
     });
   }
 
   try {
+    // Check if content type is application/json
     const contentType = req.headers.get("content-type");
-    console.log("Received Content-Type:", contentType); // Log the content type
-    
     if (contentType !== "application/json") {
-      return new NextResponse(
-        JSON.stringify({ message: "Unsupported Media Type" }),
-        {
-          status: 415,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      return new NextResponse("Unsupported Media Type", {
+        status: 415,
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      });
     }
 
-    let data: any;
-    try {
-      const json = await req.text();  // Read the request body as a text
-      console.log("Raw JSON string received:", json); // Debugging line
-      data = JSON.parse(json);  // Parse the text to JSON
-      console.log("Parsed JSON object:", data); // Debugging line
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      throw new Error("Invalid JSON data");
-    }
-
+    // Parse the JSON request body
+    const data = await req.json();
     if (!data || typeof data !== 'object') {
       throw new Error("Invalid JSON data");
     }
@@ -61,17 +46,14 @@ export async function POST(req: NextRequest) {
     const user_data = data['USERDATA'];
     const msgtype = data['MSGTYPE'];
     const network = data['NETWORK'] || "MTN";
-    const sessionId = generateSessionId();
-
-    console.log("Generated Session ID:", sessionId);
+    const sessionId = data['SESSIONID'] || randomUUID(); // Use provided or generate new
 
     let response = "";
 
+    // Initialize or retrieve session data
     if (!sessionStore[sessionId]) {
       sessionStore[sessionId] = { userData: "", currentWordIndex: 0 };
     }
-
-    console.log("Session Store:", sessionStore);
 
     // Handle different user_data inputs
     if (user_data === "") {
@@ -138,26 +120,18 @@ export async function POST(req: NextRequest) {
       response = "END Invalid Choice.";
     }
 
-    console.log("Generated Response:", response);
-
-    return new NextResponse(JSON.stringify({
-      USERID: ussd_id,
-      MSISDN: msisdn,
-      USERDATA: response,
-      MSGTYPE: false,
-      NETWORK: network
-    }), {
+    return new NextResponse(response, {
       status: 200,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain",
       },
     });
   } catch (error) {
     console.error("Error processing request:", error);
-    return new NextResponse(JSON.stringify({ message: "Invalid form data" }), {
+    return new NextResponse("Invalid form data", {
       status: 400,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain",
       },
     });
   }
