@@ -39,8 +39,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse the JSON request body
-    const json = await req.text();  // Read the request body as a text
-    const data = JSON.parse(json);  // Parse the text to JSON
+    let data: any;
+    try {
+      const json = await req.text();  // Read the request body as a text
+      console.log("Raw JSON string received:", json); // Debugging line
+      data = JSON.parse(json);  // Parse the text to JSON
+      console.log("Parsed JSON object:", data); // Debugging line
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      throw new Error("Invalid JSON data");
+    }
 
     if (!data || typeof data !== 'object') {
       throw new Error("Invalid JSON data");
