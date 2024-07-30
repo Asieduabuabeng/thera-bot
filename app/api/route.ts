@@ -61,12 +61,18 @@ export async function POST(req: NextRequest) {
     const network = data['NETWORK'] || "MTN";
     const sessionId = data['SESSIONID'] || uuidv4(); // Use provided or generate new
 
+    // Log the session ID to ensure it's being generated correctly
+    console.log("Generated/Provided Session ID:", sessionId);
+
     let response = "";
 
     // Initialize or retrieve session data
     if (!sessionStore[sessionId]) {
       sessionStore[sessionId] = { userData: "", currentWordIndex: 0 };
     }
+
+    // Log the session store for debugging
+    console.log("Session Store:", sessionStore);
 
     // Handle different user_data inputs
     if (user_data === "") {
